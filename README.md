@@ -1,9 +1,18 @@
-# termforge
+<div align="center">
 
-CLI para **diagnosticar, respaldar y configurar tu terminal de Windows**
-(Windows Terminal + PowerShell 7 + Oh My Posh), sin romper lo que ya tienes.
+# ⚒️ termforge
+
+**Diagnostica, respalda y configura tu terminal de Windows**
+*(Windows Terminal + PowerShell 7 + Oh My Posh), sin romper lo que ya tienes.*
+
+[![CI](https://github.com/Rony10-az/Termforge/actions/workflows/ci.yml/badge.svg)](https://github.com/Rony10-az/Termforge/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](pyproject.toml)
+[![Platform: Windows](https://img.shields.io/badge/platform-windows-0078D6.svg)](#)
 
 ![termforge doctor en acción](docs/doctor.png)
+
+</div>
 
 ## Por qué
 
@@ -35,8 +44,8 @@ comandos repetibles y **reversibles**.
 Requiere Python 3.10 o superior.
 
 ```powershell
-git clone <url-del-repo>
-cd termforge
+git clone https://github.com/Rony10-az/Termforge.git
+cd Termforge
 python -m venv .venv
 .venv\Scripts\Activate.ps1
 pip install -e ".[dev]"
@@ -78,4 +87,4 @@ sin tocar tu configuración real.
 
 ## Licencia
 
-MIT
+Distribuido bajo la licencia MIT. Ver [LICENSE](LICENSE) para el texto completo.
