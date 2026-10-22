@@ -3,7 +3,7 @@
 CLI para **diagnosticar, respaldar y configurar tu terminal de Windows**
 (Windows Terminal + PowerShell 7 + Oh My Posh), sin romper lo que ya tienes.
 
-<!-- TODO: agregar GIF de demo en docs/demo.gif (antes/después de la terminal) -->
+![termforge doctor en acción](docs/doctor.png)
 
 ## Por qué
 
