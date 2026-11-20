@@ -222,7 +222,7 @@ def test_apply_empty_config_does_nothing(use_env, tmp_path):
     result = runner.invoke(cli.app, ["apply", "-f", str(config)])
 
     assert result.exit_code == 0
-    assert "no pide nada" in result.output
+    assert "No hay nada que aplicar" in result.output
 
 
 def test_apply_dry_run_changes_nothing(use_env, tmp_path):

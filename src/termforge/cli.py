@@ -304,7 +304,8 @@ def apply(
         raise typer.Exit(1) from exc
 
     if config.is_empty:
-        console.print(f"{file} no pide nada (agrega `init`, `theme` o `profiles`).")
+        console.print(f"Archivo: {file}", highlight=False)
+        console.print("No hay nada que aplicar (agrega `init`, `theme` o `profiles`).")
         return
 
     try:
