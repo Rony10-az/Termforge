@@ -24,6 +24,7 @@
 - [Seguridad y reversibilidad](#seguridad-y-reversibilidad)
 - [Más herramientas para tu terminal](#más-herramientas-para-tu-terminal)
 - [Desarrollo](#desarrollo)
+- [Contribuir](CONTRIBUTING.md)
 - [Qué sigue](#qué-sigue)
 - [Licencia](#licencia)
 
@@ -149,7 +150,8 @@ tests/           # corren en Windows y Linux (GitHub Actions)
 ```
 
 Todo lo que depende del sistema pasa por `Env`, por eso los tests simulan una PC con Windows
-sin tocar tu configuración real. Un PR es bienvenido si corre `pytest -q` y `ruff check .` limpio.
+sin tocar tu configuración real. ¿Quieres contribuir? Ver [`CONTRIBUTING.md`](CONTRIBUTING.md)
+para el flujo completo (cómo agregar un comando nuevo, convenciones de commits, checklist del PR).
 
 ## Qué sigue
 
@@ -159,7 +161,6 @@ PyPI y `.exe`). Ideas para seguir:
 - [ ] `tools list` / `tools install`: igual que `doctor`/`init`, pero para el catálogo de
   [`docs/herramientas.md`](docs/herramientas.md) (zoxide, fzf, eza, lazygit...).
 - [ ] Plantillas de Issues en GitHub para sugerir una herramienta o un tema nuevo.
-- [ ] `CONTRIBUTING.md` con el flujo para agregar algo al catálogo de herramientas.
 
 ¿Falta algo que uses todos los días? Abre un issue o un PR.
 
