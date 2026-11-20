@@ -6,6 +6,7 @@
 *(Windows Terminal + PowerShell 7 + Oh My Posh), sin romper lo que ya tienes.*
 
 [![CI](https://github.com/Rony10-az/Termforge/actions/workflows/ci.yml/badge.svg)](https://github.com/Rony10-az/Termforge/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/termforge.svg)](https://pypi.org/project/termforge/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](pyproject.toml)
 [![Platform: Windows](https://img.shields.io/badge/platform-windows-0078D6.svg)](#)
@@ -16,7 +17,16 @@
 
 ## Instala tu terminal en un comando
 
-Requiere Python 3.10 o superior.
+```powershell
+pip install termforge
+termforge init   # instala PowerShell 7 + Oh My Posh con winget y configura tu perfil
+```
+
+¿No tienes Python a mano? Descarga `termforge.exe` desde la
+[última versión publicada](https://github.com/Rony10-az/Termforge/releases/latest) y úsalo
+directo, sin instalar nada más.
+
+Para desarrollar sobre el código (requiere Python 3.10+):
 
 ```powershell
 git clone https://github.com/Rony10-az/Termforge.git
@@ -24,8 +34,6 @@ cd Termforge
 python -m venv .venv
 .venv\Scripts\Activate.ps1
 pip install -e ".[dev]"
-
-termforge init   # instala PowerShell 7 + Oh My Posh con winget y configura tu perfil
 ```
 
 Eso es todo: `termforge init` detecta qué falta, lo instala con `winget` y deja tu perfil de
@@ -85,6 +93,9 @@ a problemas comunes.
 ```powershell
 pytest -q        # tests
 ruff check .     # lint
+
+pip install pyinstaller
+pyinstaller termforge.spec    # genera dist/termforge.exe
 ```
 
 Estructura:
@@ -113,7 +124,7 @@ sin tocar tu configuración real.
 - [x] `theme`: elegir y aplicar un tema de Oh My Posh de una lista
 - [x] `profiles`: agregar Git Bash y WSL al menú de Windows Terminal
 - [x] Configuración declarativa (`termforge apply -f termforge.yaml`)
-- [ ] Publicar en PyPI y empaquetar `.exe`
+- [x] Publicar en PyPI y empaquetar `.exe` (ver [`.github/workflows/release.yml`](.github/workflows/release.yml))
 
 ## Licencia
 
