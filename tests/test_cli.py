@@ -119,6 +119,52 @@ def test_init_installs_and_configures_profile(use_env):
     assert "Perfil actualizado" in result.output
 
 
+def test_theme_list_only(use_env):
+    env = use_env()
+    themes_dir = env.local_appdata / "Programs" / "oh-my-posh" / "themes"
+    themes_dir.mkdir(parents=True)
+    (themes_dir / "atomic.omp.json").write_text("{}", encoding="utf-8")
+    (themes_dir / "dracula.omp.json").write_text("{}", encoding="utf-8")
+
+    result = runner.invoke(cli.app, ["theme", "--list"])
+
+    assert result.exit_code == 0
+    assert "atomic" in result.output and "dracula" in result.output
+
+
+def test_theme_without_themes_fails(use_env):
+    use_env()
+    result = runner.invoke(cli.app, ["theme", "--list"])
+    assert result.exit_code == 1
+
+
+def test_theme_apply_by_number(use_env):
+    env = use_env()
+    themes_dir = env.local_appdata / "Programs" / "oh-my-posh" / "themes"
+    themes_dir.mkdir(parents=True)
+    (themes_dir / "atomic.omp.json").write_text("{}", encoding="utf-8")
+    (themes_dir / "dracula.omp.json").write_text("{}", encoding="utf-8")
+
+    result = runner.invoke(cli.app, ["theme", "1"])
+
+    assert result.exit_code == 0, result.output
+    assert "Tema aplicado: atomic" in result.output
+    profile = env.home / "Documents" / "PowerShell" / "Microsoft.PowerShell_profile.ps1"
+    assert "atomic.omp.json" in profile.read_text(encoding="utf-8")
+
+
+def test_theme_prompts_when_no_selector(use_env):
+    env = use_env()
+    themes_dir = env.local_appdata / "Programs" / "oh-my-posh" / "themes"
+    themes_dir.mkdir(parents=True)
+    (themes_dir / "dracula.omp.json").write_text("{}", encoding="utf-8")
+
+    result = runner.invoke(cli.app, ["theme"], input="dracula\n")
+
+    assert result.exit_code == 0, result.output
+    assert "Tema aplicado: dracula" in result.output
+
+
 def test_init_nothing_pending(use_env):
     env = use_env({"pwsh": "p", "oh-my-posh": "o"})
     profile_dir = env.home / "Documents" / "PowerShell"

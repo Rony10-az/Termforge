@@ -20,6 +20,7 @@ from termforge.backup import (
 from termforge.doctor import CheckResult, Status, exit_code, run_checks
 from termforge.env import Env, backup_root, managed_files
 from termforge.init import InitPlan, apply_plan, build_plan
+from termforge.theme import Theme, ThemeError, apply_theme, find_theme, list_themes
 
 app = typer.Typer(
     help="Diagnostica, respalda y configura tu terminal de Windows.",
@@ -154,6 +155,54 @@ def init(
         console.print("\n[yellow]Reinicia la terminal para que los cambios tomen efecto.[/yellow]")
     if report.failed:
         raise typer.Exit(1)
+
+
+def _render_themes(themes: list[Theme]) -> None:
+    table = Table(box=box.SIMPLE_HEAD, show_edge=False, pad_edge=False)
+    table.add_column("#")
+    table.add_column("Tema")
+    for i, t in enumerate(themes, start=1):
+        table.add_row(str(i), t.name)
+    console.print(table)
+
+
+@app.command()
+def theme(
+    selector: Annotated[
+        str | None, typer.Argument(help="Número de la lista o nombre del tema (parcial sirve).")
+    ] = None,
+    list_only: Annotated[
+        bool, typer.Option("--list", "-l", help="Solo lista los temas, no aplica nada.")
+    ] = False,
+) -> None:
+    """Elige un tema de Oh My Posh de una lista, sin buscar el nombre exacto."""
+    env = get_env()
+    themes = list_themes(env)
+    if not themes:
+        err_console.print(
+            "[red]No se encontraron temas de Oh My Posh.[/red] "
+            "¿Está instalado? Corre `termforge init`."
+        )
+        raise typer.Exit(1)
+
+    _render_themes(themes)
+    if list_only:
+        return
+
+    if selector is None:
+        selector = typer.prompt("\nElige un tema (número o nombre)")
+
+    try:
+        chosen = find_theme(themes, selector)
+    except ThemeError as exc:
+        err_console.print(f"[red]{exc}[/red]")
+        raise typer.Exit(1) from exc
+
+    backup_info = apply_theme(env, chosen, backup_root(env))
+    console.print(f"\n[green]Tema aplicado:[/green] {chosen.name}")
+    if backup_info:
+        console.print(f"Perfil anterior guardado como {backup_info.id}", highlight=False)
+    console.print("[yellow]Reinicia la terminal para verlo.[/yellow]")
 
 
 @app.command()
