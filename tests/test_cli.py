@@ -165,6 +165,49 @@ def test_theme_prompts_when_no_selector(use_env):
     assert "Tema aplicado: dracula" in result.output
 
 
+def test_profiles_without_settings_fails(use_env):
+    use_env()
+    result = runner.invoke(cli.app, ["profiles"])
+    assert result.exit_code == 1
+
+
+def test_profiles_dry_run_changes_nothing(use_env, settings_file):
+    import subprocess
+
+    env = use_env(
+        {"git": r"C:\Git\mingw64\bin\git.exe"},
+        run=lambda cmd, **kw: subprocess.CompletedProcess(cmd, 0, stdout=b""),
+    )
+    path = settings_file(env, '{"profiles": {"list": []}}')
+    before = path.read_text(encoding="utf-8")
+
+    result = runner.invoke(cli.app, ["profiles", "--dry-run"])
+
+    assert result.exit_code == 0
+    assert path.read_text(encoding="utf-8") == before
+
+
+def test_profiles_adds_git_bash(use_env, settings_file, tmp_path):
+    import subprocess
+
+    bash_exe = tmp_path / "Git" / "bin" / "bash.exe"
+    bash_exe.parent.mkdir(parents=True)
+    bash_exe.write_text("", encoding="utf-8")
+    git_exe = tmp_path / "Git" / "mingw64" / "bin" / "git.exe"
+
+    env = use_env(
+        {"git": str(git_exe)},
+        run=lambda cmd, **kw: subprocess.CompletedProcess(cmd, 0, stdout=b""),
+    )
+    settings_file(env, '{"profiles": {"list": []}}')
+
+    result = runner.invoke(cli.app, ["profiles", "--yes"])
+
+    assert result.exit_code == 0, result.output
+    assert "Perfiles agregados: Git Bash" in result.output
+    assert "Respaldo previo guardado" in result.output
+
+
 def test_init_nothing_pending(use_env):
     env = use_env({"pwsh": "p", "oh-my-posh": "o"})
     profile_dir = env.home / "Documents" / "PowerShell"

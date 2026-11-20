@@ -20,6 +20,9 @@ from termforge.backup import (
 from termforge.doctor import CheckResult, Status, exit_code, run_checks
 from termforge.env import Env, backup_root, managed_files
 from termforge.init import InitPlan, apply_plan, build_plan
+from termforge.profiles import ProfileCandidate, ProfilesError
+from termforge.profiles import apply_plan as apply_profiles_plan
+from termforge.profiles import build_plan as build_profiles_plan
 from termforge.theme import Theme, ThemeError, apply_theme, find_theme, list_themes
 
 app = typer.Typer(
@@ -203,6 +206,49 @@ def theme(
     if backup_info:
         console.print(f"Perfil anterior guardado como {backup_info.id}", highlight=False)
     console.print("[yellow]Reinicia la terminal para verlo.[/yellow]")
+
+
+@app.command()
+def profiles(
+    dry_run: Annotated[
+        bool, typer.Option("--dry-run", help="Muestra qué agregaría sin modificar nada.")
+    ] = False,
+    yes: Annotated[bool, typer.Option("--yes", "-y", help="No pedir confirmación.")] = False,
+) -> None:
+    """Agrega Git Bash y los distros de WSL detectados al menú de Windows Terminal."""
+    env = get_env()
+    try:
+        data, candidates = build_profiles_plan(env)
+    except ProfilesError as exc:
+        err_console.print(f"[red]{exc}[/red]")
+        raise typer.Exit(1) from exc
+
+    if not candidates:
+        console.print("No se detectó Git Bash ni distros de WSL para agregar.")
+        return
+
+    for c in candidates:
+        marker = "[green]ya está[/green]" if c.already_present else "[cyan]se agregará[/cyan]"
+        console.print(f"  {c.name}: {marker}", highlight=False)
+
+    pending: list[ProfileCandidate] = [c for c in candidates if not c.already_present]
+    if not pending:
+        console.print("\n[green]Ya están todos en el menú de Windows Terminal.[/green]")
+        return
+
+    if dry_run:
+        console.print("\n[dim]--dry-run: no se modificó nada.[/dim]")
+        return
+    if not yes and not typer.confirm(
+        "\nEsto reescribe settings.json (se respalda antes, pero se pierde cualquier "
+        "comentario manual que tengas ahí). ¿Continuar?"
+    ):
+        raise typer.Exit(1)
+
+    backup_info = apply_profiles_plan(env, data, pending, backup_root(env))
+    names = ", ".join(c.name for c in pending)
+    console.print(f"\n[green]Perfiles agregados:[/green] {names}")
+    console.print(f"Respaldo previo guardado como {backup_info.id}", highlight=False)
 
 
 @app.command()

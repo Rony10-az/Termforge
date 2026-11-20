@@ -49,6 +49,7 @@ a problemas comunes.
 | `termforge doctor` | Revisa qué falta o está mal (PowerShell 7, Windows Terminal, Oh My Posh, Nerd Font, Git, WSL, perfil) y muestra cómo arreglarlo. `--json` para scripts. |
 | `termforge init [--dry-run] [-y]` | Instala con `winget` lo que falte (PowerShell 7, Oh My Posh) y agrega la inicialización de Oh My Posh al perfil de PowerShell. Respalda el perfil antes de modificarlo. |
 | `termforge theme [número\|nombre] [--list]` | Lista los temas de Oh My Posh ya instalados y aplica el que elijas (por número, sin buscar el nombre exacto). Respalda el perfil antes de modificarlo. |
+| `termforge profiles [--dry-run] [-y]` | Agrega Git Bash y los distros de WSL detectados como perfiles fijos en el menú de Windows Terminal (WSL normalmente solo aparece ahí de forma dinámica, sin quedar guardado). Respalda `settings.json` antes de modificarlo. |
 | `termforge backup [-l etiqueta]` | Guarda una copia de `settings.json` y del perfil de PowerShell. |
 | `termforge backups` | Lista los respaldos. |
 | `termforge restore [id] [--dry-run] [-y]` | Restaura un respaldo (el más reciente por defecto). Antes guarda el estado actual como `pre-restore`. |
@@ -61,6 +62,8 @@ a problemas comunes.
 - **`--dry-run`**: muestra qué haría sin tocar nada.
 - Lee el `settings.json` de Windows Terminal aunque tenga comentarios y comas finales (JSONC).
 - Los respaldos viven en `%LOCALAPPDATA%\termforge\backups` (se cambia con `TERMFORGE_HOME`).
+- `profiles` sí **reescribe** `settings.json` (para agregar perfiles), así que pierde cualquier
+  comentario manual que tengas ahí; por eso respalda el archivo antes de tocarlo.
 
 ## Desarrollo
 
@@ -77,6 +80,7 @@ src/termforge/
 ├── doctor.py    # diagnóstico
 ├── init.py      # instalación (winget) y configuración de Oh My Posh
 ├── theme.py     # listar y aplicar temas de Oh My Posh
+├── profiles.py  # agregar Git Bash/WSL al menú de Windows Terminal
 ├── backup.py    # respaldo y restauración
 ├── env.py       # rutas y entorno (simulable en tests)
 └── jsonc.py     # lector de JSON con comentarios
@@ -91,7 +95,7 @@ sin tocar tu configuración real.
 - [x] `doctor`, `backup`, `restore`
 - [x] `init`: instalar dependencias con winget y configurar Oh My Posh
 - [x] `theme`: elegir y aplicar un tema de Oh My Posh de una lista
-- [ ] `profiles add`: agregar Git Bash y WSL al menú de Windows Terminal
+- [x] `profiles`: agregar Git Bash y WSL al menú de Windows Terminal
 - [ ] Configuración declarativa (`config.yaml`)
 - [ ] Publicar en PyPI y empaquetar `.exe`
 
