@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 from typing import Annotated
 
 import typer
@@ -17,6 +18,7 @@ from termforge.backup import (
     list_backups,
     restore_backup,
 )
+from termforge.config import ConfigError, ConfigReport, TermforgeConfig, load_config, run_config
 from termforge.doctor import CheckResult, Status, exit_code, run_checks
 from termforge.env import Env, backup_root, managed_files
 from termforge.init import InitPlan, apply_plan, build_plan
@@ -249,6 +251,83 @@ def profiles(
     names = ", ".join(c.name for c in pending)
     console.print(f"\n[green]Perfiles agregados:[/green] {names}")
     console.print(f"Respaldo previo guardado como {backup_info.id}", highlight=False)
+
+
+def _render_config_report(config: TermforgeConfig, report: ConfigReport) -> None:
+    if config.init:
+        plan = report.init_plan
+        if plan and plan.has_pending_work:
+            pending = [s.name for s in plan.pending_installs]
+            if pending:
+                console.print(f"[bold]init:[/bold] instalaría {', '.join(pending)}")
+            if not plan.profile.already_configured:
+                console.print(
+                    "[bold]init:[/bold] inicializaría Oh My Posh en el perfil de PowerShell"
+                )
+        else:
+            console.print("[bold]init:[/bold] [green]ya está todo instalado y configurado[/green]")
+
+    if config.theme:
+        if report.theme_pending_install:
+            console.print(
+                f"[bold]theme:[/bold] '{config.theme}' se aplicará después de que "
+                "`init` instale Oh My Posh"
+            )
+        elif report.theme_applied:
+            console.print(f"[bold]theme:[/bold] aplicaría '{report.theme_applied.name}'")
+
+    if config.profiles:
+        if report.profiles_status:
+            for c in report.profiles_status:
+                marker = "ya está" if c.already_present else "se agregaría"
+                console.print(f"[bold]profiles:[/bold] {c.name}: {marker}")
+        else:
+            console.print("[bold]profiles:[/bold] nada que coincida con lo pedido en este equipo")
+
+
+@app.command()
+def apply(
+    file: Annotated[
+        Path, typer.Option("--file", "-f", help="Archivo de configuración declarativa (YAML).")
+    ] = Path("termforge.yaml"),
+    dry_run: Annotated[
+        bool, typer.Option("--dry-run", help="Muestra qué haría sin instalar ni modificar nada.")
+    ] = False,
+    yes: Annotated[bool, typer.Option("--yes", "-y", help="No pedir confirmación.")] = False,
+) -> None:
+    """Deja tu terminal como la describe un YAML (init, theme, profiles en uno)."""
+    env = get_env()
+    try:
+        config = load_config(file)
+    except ConfigError as exc:
+        err_console.print(f"[red]{exc}[/red]")
+        raise typer.Exit(1) from exc
+
+    if config.is_empty:
+        console.print(f"{file} no pide nada (agrega `init`, `theme` o `profiles`).")
+        return
+
+    try:
+        preview = run_config(env, config, backup_root(env), dry_run=True)
+    except ConfigError as exc:
+        err_console.print(f"[red]{exc}[/red]")
+        raise typer.Exit(1) from exc
+
+    _render_config_report(config, preview)
+
+    if dry_run:
+        console.print("\n[dim]--dry-run: no se instaló ni modificó nada.[/dim]")
+        return
+    if not yes and not typer.confirm("\n¿Aplicar esta configuración?"):
+        raise typer.Exit(1)
+
+    try:
+        run_config(env, config, backup_root(env), dry_run=False)
+    except ConfigError as exc:
+        err_console.print(f"[red]{exc}[/red]")
+        raise typer.Exit(1) from exc
+
+    console.print("\n[green]Configuración aplicada.[/green]")
 
 
 @app.command()

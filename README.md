@@ -32,6 +32,20 @@ Eso es todo: `termforge init` detecta qué falta, lo instala con `winget` y deja
 PowerShell inicializando Oh My Posh, sin que tengas que buscar instaladores ni editar nada a
 mano. Si ya tenías algo instalado, `termforge` lo respeta y solo completa lo que falta.
 
+¿Quieres repetir exactamente esta configuración en otra PC? Describe el resultado en un YAML
+y aplícalo con un comando:
+
+```yaml
+# termforge.yaml
+init: true
+theme: jandedobbeleer
+profiles: [git-bash, wsl]
+```
+
+```powershell
+termforge apply
+```
+
 ## Por qué
 
 Dejar una terminal bien configurada toma horas: instalar programas, elegir una Nerd Font,
@@ -50,6 +64,7 @@ a problemas comunes.
 | `termforge init [--dry-run] [-y]` | Instala con `winget` lo que falte (PowerShell 7, Oh My Posh) y agrega la inicialización de Oh My Posh al perfil de PowerShell. Respalda el perfil antes de modificarlo. |
 | `termforge theme [número\|nombre] [--list]` | Lista los temas de Oh My Posh ya instalados y aplica el que elijas (por número, sin buscar el nombre exacto). Respalda el perfil antes de modificarlo. |
 | `termforge profiles [--dry-run] [-y]` | Agrega Git Bash y los distros de WSL detectados como perfiles fijos en el menú de Windows Terminal (WSL normalmente solo aparece ahí de forma dinámica, sin quedar guardado). Respalda `settings.json` antes de modificarlo. |
+| `termforge apply [-f archivo.yaml] [--dry-run] [-y]` | Deja tu terminal como la describe un YAML (`init`, `theme`, `profiles` en una sola corrida). Ver [`termforge.example.yaml`](termforge.example.yaml). |
 | `termforge backup [-l etiqueta]` | Guarda una copia de `settings.json` y del perfil de PowerShell. |
 | `termforge backups` | Lista los respaldos. |
 | `termforge restore [id] [--dry-run] [-y]` | Restaura un respaldo (el más reciente por defecto). Antes guarda el estado actual como `pre-restore`. |
@@ -81,6 +96,7 @@ src/termforge/
 ├── init.py      # instalación (winget) y configuración de Oh My Posh
 ├── theme.py     # listar y aplicar temas de Oh My Posh
 ├── profiles.py  # agregar Git Bash/WSL al menú de Windows Terminal
+├── config.py    # configuración declarativa (termforge apply)
 ├── backup.py    # respaldo y restauración
 ├── env.py       # rutas y entorno (simulable en tests)
 └── jsonc.py     # lector de JSON con comentarios
@@ -96,7 +112,7 @@ sin tocar tu configuración real.
 - [x] `init`: instalar dependencias con winget y configurar Oh My Posh
 - [x] `theme`: elegir y aplicar un tema de Oh My Posh de una lista
 - [x] `profiles`: agregar Git Bash y WSL al menú de Windows Terminal
-- [ ] Configuración declarativa (`config.yaml`)
+- [x] Configuración declarativa (`termforge apply -f termforge.yaml`)
 - [ ] Publicar en PyPI y empaquetar `.exe`
 
 ## Licencia

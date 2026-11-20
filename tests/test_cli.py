@@ -208,6 +208,53 @@ def test_profiles_adds_git_bash(use_env, settings_file, tmp_path):
     assert "Respaldo previo guardado" in result.output
 
 
+def test_apply_missing_file_fails(use_env):
+    use_env()
+    result = runner.invoke(cli.app, ["apply", "-f", "no-existe.yaml"])
+    assert result.exit_code == 1
+
+
+def test_apply_empty_config_does_nothing(use_env, tmp_path):
+    use_env()
+    config = tmp_path / "termforge.yaml"
+    config.write_text("", encoding="utf-8")
+
+    result = runner.invoke(cli.app, ["apply", "-f", str(config)])
+
+    assert result.exit_code == 0
+    assert "no pide nada" in result.output
+
+
+def test_apply_dry_run_changes_nothing(use_env, tmp_path):
+    env = use_env({})
+    config = tmp_path / "termforge.yaml"
+    config.write_text("init: true\n", encoding="utf-8")
+
+    result = runner.invoke(cli.app, ["apply", "-f", str(config), "--dry-run"])
+
+    assert result.exit_code == 0
+    assert "instalaría" in result.output
+    profile = env.home / "Documents" / "PowerShell" / "Microsoft.PowerShell_profile.ps1"
+    assert not profile.exists()
+
+
+def test_apply_full_flow(use_env, tmp_path):
+    import subprocess
+
+    env = use_env(
+        {}, run=lambda cmd, **kw: subprocess.CompletedProcess(cmd, 0, stdout="ok")
+    )
+    config = tmp_path / "termforge.yaml"
+    config.write_text("init: true\n", encoding="utf-8")
+
+    result = runner.invoke(cli.app, ["apply", "-f", str(config), "--yes"])
+
+    assert result.exit_code == 0, result.output
+    assert "Configuración aplicada" in result.output
+    profile = env.home / "Documents" / "PowerShell" / "Microsoft.PowerShell_profile.ps1"
+    assert "oh-my-posh init pwsh" in profile.read_text(encoding="utf-8")
+
+
 def test_init_nothing_pending(use_env):
     env = use_env({"pwsh": "p", "oh-my-posh": "o"})
     profile_dir = env.home / "Documents" / "PowerShell"

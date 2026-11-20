@@ -1,0 +1,16 @@
+# Copia este archivo a termforge.yaml (o pásale la ruta con -f) y ajústalo.
+# `termforge apply` deja tu terminal así: instala lo que falte, aplica el
+# tema y agrega los perfiles pedidos. Solo completa lo que falta, nunca
+# borra ni degrada algo que ya tenías.
+
+# Instala PowerShell 7 y Oh My Posh si faltan, y configura el perfil.
+init: true
+
+# Nombre de un tema instalado de Oh My Posh (número o nombre parcial no
+# sirven aquí, usa el nombre completo que ves con `termforge theme --list`).
+theme: jandedobbeleer
+
+# Qué agregar al menú de Windows Terminal: "git-bash" y/o "wsl".
+profiles:
+  - git-bash
+  - wsl
