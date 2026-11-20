@@ -15,18 +15,40 @@
 
 </div>
 
-## Instala tu terminal en un comando
+## Contenido
+
+- [Instalación](#instalación)
+- [Guía rápida](#guía-rápida)
+- [Configuración declarativa](#configuración-declarativa)
+- [Comandos](#comandos)
+- [Seguridad y reversibilidad](#seguridad-y-reversibilidad)
+- [Más herramientas para tu terminal](#más-herramientas-para-tu-terminal)
+- [Desarrollo](#desarrollo)
+- [Qué sigue](#qué-sigue)
+- [Licencia](#licencia)
+
+## Por qué
+
+Dejar una terminal bien configurada toma horas: instalar programas, elegir una Nerd Font,
+editar `settings.json`, tocar el perfil de PowerShell. `termforge` convierte ese proceso en
+comandos repetibles y **reversibles**: todo lo que modifica, lo respalda antes; todo lo que
+instala, solo lo hace si realmente falta.
+
+## Instalación
 
 ```powershell
 pip install termforge
-termforge init   # instala PowerShell 7 + Oh My Posh con winget y configura tu perfil
 ```
 
 ¿No tienes Python a mano? Descarga `termforge.exe` desde la
 [última versión publicada](https://github.com/Rony10-az/Termforge/releases/latest) y úsalo
 directo, sin instalar nada más.
 
-Para desarrollar sobre el código (requiere Python 3.10+):
+Requiere Windows 10/11 con [`winget`](https://aka.ms/getwinget) (viene de fábrica en Windows
+moderno; si falta, `termforge doctor` te dice cómo conseguirlo).
+
+<details>
+<summary>Para desarrollar sobre el código</summary>
 
 ```powershell
 git clone https://github.com/Rony10-az/Termforge.git
@@ -36,9 +58,24 @@ python -m venv .venv
 pip install -e ".[dev]"
 ```
 
-Eso es todo: `termforge init` detecta qué falta, lo instala con `winget` y deja tu perfil de
-PowerShell inicializando Oh My Posh, sin que tengas que buscar instaladores ni editar nada a
-mano. Si ya tenías algo instalado, `termforge` lo respeta y solo completa lo que falta.
+Requiere Python 3.10 o superior.
+
+</details>
+
+## Guía rápida
+
+```powershell
+termforge doctor     # ¿qué falta o está mal configurado?
+termforge init       # instala PowerShell 7 + Oh My Posh con winget y configura tu perfil
+termforge theme      # elige un tema de Oh My Posh de una lista (sin buscar el nombre exacto)
+termforge profiles   # agrega Git Bash y tus distros de WSL al menú de Windows Terminal
+```
+
+`init` detecta qué falta, lo instala con `winget` y deja tu perfil de PowerShell inicializando
+Oh My Posh, sin que tengas que buscar instaladores ni editar nada a mano. Si ya tenías algo
+instalado, `termforge` lo respeta y solo completa lo que falta.
+
+## Configuración declarativa
 
 ¿Quieres repetir exactamente esta configuración en otra PC? Describe el resultado en un YAML
 y aplícalo con un comando:
@@ -54,39 +91,36 @@ profiles: [git-bash, wsl]
 termforge apply
 ```
 
-## Por qué
+Ver [`termforge.example.yaml`](termforge.example.yaml) para la plantilla completa.
 
-Dejar una terminal bien configurada toma horas: instalar programas, elegir una Nerd Font,
-editar `settings.json`, tocar el perfil de PowerShell. `termforge` convierte ese proceso en
-comandos repetibles y **reversibles**.
-
-¿Quieres saber qué más instalar? [`docs/herramientas.md`](docs/herramientas.md) es una guía con
-las herramientas populares para una buena terminal (zoxide, fzf, eza, lazygit, etc.) y soluciones
-a problemas comunes.
-
-## Comandos (v0.1)
+## Comandos
 
 | Comando | Qué hace |
 |---|---|
-| `termforge doctor` | Revisa qué falta o está mal (PowerShell 7, Windows Terminal, Oh My Posh, Nerd Font, Git, WSL, perfil) y muestra cómo arreglarlo. `--json` para scripts. |
-| `termforge init [--dry-run] [-y]` | Instala con `winget` lo que falte (PowerShell 7, Oh My Posh) y agrega la inicialización de Oh My Posh al perfil de PowerShell. Respalda el perfil antes de modificarlo. |
-| `termforge theme [número\|nombre] [--list]` | Lista los temas de Oh My Posh ya instalados y aplica el que elijas (por número, sin buscar el nombre exacto). Respalda el perfil antes de modificarlo. |
-| `termforge profiles [--dry-run] [-y]` | Agrega Git Bash y los distros de WSL detectados como perfiles fijos en el menú de Windows Terminal (WSL normalmente solo aparece ahí de forma dinámica, sin quedar guardado). Respalda `settings.json` antes de modificarlo. |
-| `termforge apply [-f archivo.yaml] [--dry-run] [-y]` | Deja tu terminal como la describe un YAML (`init`, `theme`, `profiles` en una sola corrida). Ver [`termforge.example.yaml`](termforge.example.yaml). |
+| `termforge doctor [--json]` | Revisa qué falta o está mal (PowerShell 7, Windows Terminal, Oh My Posh, Nerd Font, Git, WSL, perfil) y muestra cómo arreglarlo. `--json` para scripts; termina con código `1` si hay fallos. |
+| `termforge init [--dry-run] [-y]` | Instala con `winget` lo que falte (PowerShell 7, Oh My Posh) y agrega la inicialización de Oh My Posh al perfil de PowerShell. |
+| `termforge theme [número\|nombre] [--list]` | Lista los temas de Oh My Posh ya instalados y aplica el que elijas (por número, sin buscar el nombre exacto). |
+| `termforge profiles [--dry-run] [-y]` | Agrega Git Bash y los distros de WSL detectados como perfiles fijos en el menú de Windows Terminal (WSL normalmente solo aparece ahí de forma dinámica, sin quedar guardado). |
+| `termforge apply [-f archivo.yaml] [--dry-run] [-y]` | Deja tu terminal como la describe un YAML (`init`, `theme`, `profiles` en una sola corrida). |
 | `termforge backup [-l etiqueta]` | Guarda una copia de `settings.json` y del perfil de PowerShell. |
 | `termforge backups` | Lista los respaldos. |
 | `termforge restore [id] [--dry-run] [-y]` | Restaura un respaldo (el más reciente por defecto). Antes guarda el estado actual como `pre-restore`. |
 
-`doctor` termina con código `1` si hay fallos, así que sirve también en scripts y CI.
+## Seguridad y reversibilidad
 
-## Seguridad
-
-- **Backup antes de modificar**: `restore` nunca sobrescribe sin guardar antes el estado actual.
-- **`--dry-run`**: muestra qué haría sin tocar nada.
+- **Backup antes de modificar**: `restore` nunca sobrescribe sin guardar antes el estado actual;
+  `init`/`theme`/`profiles` respaldan el archivo que van a tocar si ya existía.
+- **`--dry-run`** en todos los comandos que instalan o modifican algo: muestra qué haría sin
+  tocar nada.
 - Lee el `settings.json` de Windows Terminal aunque tenga comentarios y comas finales (JSONC).
 - Los respaldos viven en `%LOCALAPPDATA%\termforge\backups` (se cambia con `TERMFORGE_HOME`).
 - `profiles` sí **reescribe** `settings.json` (para agregar perfiles), así que pierde cualquier
   comentario manual que tengas ahí; por eso respalda el archivo antes de tocarlo.
+
+## Más herramientas para tu terminal
+
+[`docs/herramientas.md`](docs/herramientas.md) es una guía con las herramientas populares para
+una buena terminal (zoxide, fzf, eza, lazygit, etc.) y soluciones a problemas comunes.
 
 ## Desarrollo
 
@@ -115,16 +149,19 @@ tests/           # corren en Windows y Linux (GitHub Actions)
 ```
 
 Todo lo que depende del sistema pasa por `Env`, por eso los tests simulan una PC con Windows
-sin tocar tu configuración real.
+sin tocar tu configuración real. Un PR es bienvenido si corre `pytest -q` y `ruff check .` limpio.
 
-## Roadmap
+## Qué sigue
 
-- [x] `doctor`, `backup`, `restore`
-- [x] `init`: instalar dependencias con winget y configurar Oh My Posh
-- [x] `theme`: elegir y aplicar un tema de Oh My Posh de una lista
-- [x] `profiles`: agregar Git Bash y WSL al menú de Windows Terminal
-- [x] Configuración declarativa (`termforge apply -f termforge.yaml`)
-- [x] Publicar en PyPI y empaquetar `.exe` (ver [`.github/workflows/release.yml`](.github/workflows/release.yml))
+Ya está lo esencial (diagnóstico, instalación, temas, perfiles, configuración declarativa,
+PyPI y `.exe`). Ideas para seguir:
+
+- [ ] `tools list` / `tools install`: igual que `doctor`/`init`, pero para el catálogo de
+  [`docs/herramientas.md`](docs/herramientas.md) (zoxide, fzf, eza, lazygit...).
+- [ ] Plantillas de Issues en GitHub para sugerir una herramienta o un tema nuevo.
+- [ ] `CONTRIBUTING.md` con el flujo para agregar algo al catálogo de herramientas.
+
+¿Falta algo que uses todos los días? Abre un issue o un PR.
 
 ## Licencia
 
